@@ -18,6 +18,22 @@ namespace GroceryStoreAPI.Controllers
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public class CustomerController : ControllerBase
     {
+        [HttpPatch]
+        [Route("/[controller]/[action]/{id}/{name}")]
+        // TODO: impliment security
+        // API adding a customer
+        public bool UpdateCustomer(int id, string name)
+        {
+            bool returnSuccessfulInsertFlag = true;
+
+            if (name == "")
+                returnSuccessfulInsertFlag = false;
+
+            returnSuccessfulInsertFlag = new Utils.UtilClass().UpdateRecordToJsonFile(id, name);
+
+            return returnSuccessfulInsertFlag;
+        }
+
         [HttpPost]
         [Route("/[controller]/[action]/{name}")]
         // TODO: impliment security
@@ -39,7 +55,7 @@ namespace GroceryStoreAPI.Controllers
         // TODO: impliment security
         public string GetCustomerIdByName(string name)
         {
-            if (!string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
                 return "";
 
             // API retrieving a customer Id by name
@@ -47,7 +63,7 @@ namespace GroceryStoreAPI.Controllers
 
             IEnumerable<JToken> customerId = jsonData.SelectToken("$.customers[?(@.name == '" + name + "')].id");
 
-            return string.Format("Id: {0} - Name: {1}", customerId, name);
+            return customerId != null ? string.Format("Id: {0} - Name: {1}", customerId, name) : "Not Found";
         }
 
         [HttpGet]
@@ -73,7 +89,7 @@ namespace GroceryStoreAPI.Controllers
         {
             // API listing all customers
             // Return in Json List<Customer> format
-            string returnStringList = "";
+            // string returnStringList = "";
 
             JObject jsonData = new Utils.UtilClass().ReadJsonFile();
             JArray allCustomers = (JArray)jsonData["customers"];
